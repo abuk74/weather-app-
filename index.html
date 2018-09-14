@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Made with Thimble</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script>
+
+  $(document).ready(function(){
+    var date = new Date();
+    $('#today').html(new Date().toDateString());
+    //https://stackoverflow.com/questions/3552461/how-to-format-a-javascript-date
+});
+
+//https://www.weatherbit.io/api/swaggerui/weather-api-v2#!/Current32Weather32Data/get_current_lat_lat_lon_lon
+//https://www.weatherbit.io/api/codes
+
+var latitude;
+var longitude;
+var apiKey = 'bb6c42415ba8449894ca4c415cba14a6';
+var url = 'https://api.weatherbit.io/v2.0/current?lat=';
+
+function getGeoCodes()
+{
+  var city = document.getElementById("dropDownCities");
+  var cityName = city.options[city.selectedIndex].value;
+
+//https://www.w3schools.com/html/tryit.asp?filename=tryhtml5_geolocation
+
+ geocoder = new google.maps.Geocoder();
+ geocoder.geocode({ 'address': cityName }, function(results, status)
+  {
+    if (status === google.maps.GeocoderStatus.OK)
+    {
+        latitude = results[0].geometry.location.lat();
+        longitude = results[0].geometry.location.lng();
+
+        weather();
+    }
+    else
+    {
+      alert("Wystąpił problem przy komunikacji z WebService.")
+    }
+  });
+}
+
+function weather() {
+  $.getJSON(url + latitude + "&lon=" + longitude + "&lang=pl&key=" + apiKey + "&callback=", function(results)
+  {
+    var temp = results.data[0].temp;
+    $('#tempCel').html(temp + '° C');
+    $('#tempFar').html((temp * 9/5 + 32).toFixed(2) + '° F');
+
+    $("#imgShowWeather").attr('src', 'img/' + results.data[0].weather.icon + '.png');
+  });
+}
+
+function changeCity()
+{
+  getGeoCodes();
+}
+
+</script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="tittle"><h1>Weather application</h1></div>
+      <div class="date" id="today"></div>
+      <div class="icon"><img id="imgShowWeather"  width="140"></div>
+      <div class="SC" id="tempCel"></div>
+      <div class="SF" id="tempFar"></div>
+    <div id="flip">
+    <select id='dropDownCities' class="dropbtn" onchange="changeCity()">
+      <option selected disabled> </option>
+      <option value="Olesnica">Oleśnica</option>
+      <option value="Wroclaw">Wrocław</option>
+      <option value="Warszawa">Warszawa</option>
+      <option value="Poznan">Poznań</option>
+    </select>
+    </div>
+  </div>
+  </body>
+</html>
